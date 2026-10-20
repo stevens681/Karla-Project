@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Residencial Karla IX</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+  :root { --page-bg: #f5f5f4; }
+  html, body { margin: 0; padding: 0; background: var(--page-bg); }
+  #root { min-height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+/* ---------------------------------------------------------------------- */
+/* Minimal inline-SVG icon set (stands in for lucide-react in this        */
+/* standalone page, since published pages can't load that package)        */
+/* ---------------------------------------------------------------------- */
+
+function Icon({ name, size = 16, className = "" }) {
+  const c = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", className };
+  switch (name) {
+    case "building": return <svg {...c}><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 21v-4h6v4M9 8h1M14 8h1M9 12h1M14 12h1"/></svg>;
+    case "dashboard": return <svg {...c}><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>;
+    case "users": return <svg {...c}><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 2.5-5 6-5s6 2 6 5"/><circle cx="17" cy="8" r="2.5"/><path d="M16 15.2c2.6.5 4 2 4 4.8"/></svg>;
+    case "wallet": return <svg {...c}><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14" r="1.2" fill="currentColor" stroke="none"/></svg>;
+    case "flame": return <svg {...c}><path d="M12 2c1 3-3 4-3 8a3 3 0 006 0c0-1-.5-2-1-2.5.8 2 .5 4-1 5.5-1.7-1.5-2.5-3-2-5-1.7 1.3-3 3.3-3 5.5a5 5 0 0010 0c0-6-4-7-6-11.5Z"/></svg>;
+    case "clipboard": return <svg {...c}><rect x="5" y="4" width="14" height="17" rx="1.5"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8 11h8M8 15h8M8 19h5"/></svg>;
+    case "scroll": return <svg {...c}><path d="M6 4h12v13a3 3 0 01-3 3H8a2 2 0 01-2-2V4Z"/><path d="M6 4a2 2 0 10-2 2v13"/><path d="M9 9h6M9 13h6"/></svg>;
+    case "logout": return <svg {...c}><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>;
+    case "plus": return <svg {...c}><path d="M12 5v14M5 12h14"/></svg>;
+    case "check": return <svg {...c}><path d="M20 6 9 17l-5-5"/></svg>;
+    case "x": return <svg {...c}><path d="M18 6 6 18M6 6l12 12"/></svg>;
+    case "eye": return <svg {...c}><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>;
+    case "eyeOff": return <svg {...c}><path d="M3 3l18 18"/><path d="M10.6 5.2A10.8 10.8 0 0112 5c6 0 10 7 10 7a17.7 17.7 0 01-3.2 4M6.1 6.1C3.6 7.8 2 12 2 12s4 7 10 7a10 10 0 004-.8"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg>;
+    case "globe": return <svg {...c}><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg>;
+    case "arrowUpRight": return <svg {...c}><path d="M7 17 17 7M8 7h9v9"/></svg>;
+    case "arrowDownRight": return <svg {...c}><path d="M7 7l10 10M17 7v10"/></svg>;
+    case "send": return <svg {...c}><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/></svg>;
+    case "dollar": return <svg {...c}><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.4 1.2-2 2.5-2s2.5.7 2.5 2-1 1.7-2.5 2-2.5.7-2.5 2 1.1 2 2.5 2 2.5-.6 2.5-2"/></svg>;
+    default: return null;
+  }
+}
+const Building2 = (p) => <Icon name="building" {...p} />;
+const LayoutDashboard = (p) => <Icon name="dashboard" {...p} />;
+const Users = (p) => <Icon name="users" {...p} />;
+const Wallet = (p) => <Icon name="wallet" {...p} />;
+const Flame = (p) => <Icon name="flame" {...p} />;
+const ClipboardList = (p) => <Icon name="clipboard" {...p} />;
+const ScrollText = (p) => <Icon name="scroll" {...p} />;
+const LogOut = (p) => <Icon name="logout" {...p} />;
+const Plus = (p) => <Icon name="plus" {...p} />;
+const Check = (p) => <Icon name="check" {...p} />;
+const X = (p) => <Icon name="x" {...p} />;
+const Eye = (p) => <Icon name="eye" {...p} />;
+const EyeOff = (p) => <Icon name="eyeOff" {...p} />;
+const Globe = (p) => <Icon name="globe" {...p} />;
+const ArrowUpRight = (p) => <Icon name="arrowUpRight" {...p} />;
+const ArrowDownRight = (p) => <Icon name="arrowDownRight" {...p} />;
+const Send = (p) => <Icon name="send" {...p} />;
+const CircleDollarSign = (p) => <Icon name="dollar" {...p} />;
+
+/* ---------------------------------------------------------------------- */
+/* Constants & seed data (sample data — not real figures) */
+/* ---------------------------------------------------------------------- */
+
+const MONTHS_SEED = [
+  "2025-09","2025-10","2025-11","2025-12","2026-01","2026-02",
+  "2026-03","2026-04","2026-05","2026-06","2026-07","2026-08",
+  "2026-09","2026-10","2026-11","2026-12"
+];
+
+const zip = (months, values) => { const o = {}; months.forEach((m, i) => { o[m] = values[i]; }); return o; };
+
+// NOTE: all figures below are SAMPLE DATA for demonstration only.
+function buildApartmentsSeed() {
+  const maint = {
+    "1C": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "1D": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "2A": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "2B": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "2C": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "2D": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "3A": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "3B": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "3C": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "3D": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "4A": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "4B": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "4C": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+    "4D": [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,null,null,null,null],
+  };
+  const gas = {
+    "1C": [1367.31,0,630.01,0,930.04,0,867.85,0,1483.77,0,1412.04,0,null,null,null,null],
+    "1D": [1670.62,0,704.33,0,1106.31,0,635.76,0,862.37,0,1206.43,0,null,null,null,null],
+    "2A": [631.84,0,838.61,0,1379.86,0,1253.93,0,864.53,0,1307.12,0,null,null,null,null],
+    "2B": [1571.32,0,607.80,0,1566.98,0,1437.77,0,1008.30,0,786.58,0,null,null,null,null],
+    "2C": [1748.66,0,1003.91,0,711.30,0,716.06,0,1616.99,0,1324.47,0,null,null,null,null],
+    "2D": [1568.55,0,1475.68,0,1243.47,0,1767.74,0,1054.24,0,1262.45,0,null,null,null,null],
+    "3A": [1595.29,0,1342.22,0,1634.05,0,1292.82,0,1445.49,0,654.99,0,null,null,null,null],
+    "3B": [873.48,0,947.27,0,695.75,0,879.35,0,721.20,0,933.57,0,null,null,null,null],
+    "3C": [1362.82,0,1037.80,0,1044.22,0,851.41,0,920.37,0,1723.99,0,null,null,null,null],
+    "3D": [1377.64,0,1330.96,0,805.37,0,1474.95,0,796.08,0,1055.35,0,null,null,null,null],
+    "4A": [1787.43,0,1368,0,1268.34,0,1421.54,0,1611.42,0,1531.20,0,null,null,null,null],
+    "4B": [874.86,0,638.52,0,978.54,0,921.29,0,853.18,0,1731.49,0,null,null,null,null],
+    "4C": [1651.64,0,977.61,0,1386.53,0,1074.76,0,1697.46,0,1150.62,0,null,null,null,null],
+    "4D": [917.86,0,895.95,0,1273.64,0,915.29,0,1301.50,0,1677.39,0,null,null,null,null],
+  };
+  const pending = { "1C":4000, "1D":2000, "2A":0, "2B":0, "2C":6000, "2D":4000, "3A":0, "3B":0, "3C":0, "3D":0, "4A":0, "4B":4000, "4C":6000, "4D":0 };
+  return Object.keys(maint).map(id => ({
+    id, residentName: "", username: id.toLowerCase(), password: "CHANGE_ME",
+    pendingBalance: pending[id] ?? 0, maint: zip(MONTHS_SEED, maint[id]), gas: zip(MONTHS_SEED, gas[id]),
+  }));
+}
+
+function buildExpensesSeed() {
+  const residential = [
+    ["Personal de Limpieza",[12770,13192,12936,12503,13106,13885,13361,12229,13770,13502,13537,12680,0,0,0,0]],
+    ["Energía Eléctrica",[4294,4158,4003,4722,4720,4972,4762,4508,4106,4625,4842,4508,0,0,0,0]],
+    ["Basura",[580,650,565,881,869,867,740,695,545,645,894,823,0,0,0,0]],
+    ["Materiales de limpieza",[968,0,0,969,0,0,1197,0,0,855,0,0,0,0,0,0]],
+    ["Mantenimiento Cerco Eléctrico",[3732,0,0,0,0,0,3816,0,0,0,0,0,0,0,0,0]],
+    ["Servicio de Internet y Cámaras",[3956,0,0,0,3065,0,0,0,2252,0,0,0,0,0,0,0]],
+    ["Servicio Plomería",[2490,0,0,0,0,0,2920,0,0,0,0,0,0,0,0,0]],
+    ["Fumigación",[2583,0,0,0,0,0,2764,0,0,0,0,0,0,0,0,0]],
+    ["Limpieza Cisterna",[2803,0,0,0,0,0,2982,0,0,0,0,0,0,0,0,0]],
+    ["Servicio Eléctrico",[2893,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],
+  ];
+  const gas = [["Pago suministro Gas Propano",[13510.53,0,13379.74,0,13425.90,0,12797.98,0,13343.37,0,12746.84,0,null,null,null,null]]];
+  const toRows = (arr, prefix) => arr.map(([concept, values], i) => ({ id: `${prefix}-${i}`, concept, amounts: zip(MONTHS_SEED, values) }));
+  return { residential: toRows(residential, "res"), gas: toRows(gas, "gas") };
+}
+
+// Default admin login — change it on first use.
+const CONFIG_SEED = { residencialName: "Residencial Karla IX", months: MONTHS_SEED, adminUsername: "admin", adminPassword: "CHANGE_ME" };
+const BALANCE_SEED = { balanceAnterior: 50000, ingresoGasAtrasado: 5000, ingresosDeudasPendientes: 3000, pagoExtraordinario: 10000 };
+const COLORS = { income: "#0f766e", expense: "#be123c", net: "#1c1917" };
+
+/* ---------------------------------------------------------------------- */
+/* i18n                                                                    */
+/* ---------------------------------------------------------------------- */
+
+const DICT = {
+  loginTitle: ["Portal del Residencial", "Residential Portal"],
+  loginSubtitle: ["Administración financiera del residencial", "Building financial administration"],
+  chooseRole: ["¿Cómo deseas ingresar?", "How would you like to sign in?"],
+  roleAdmin: ["Administrador", "Administrator"],
+  roleAdminDesc: ["Gestionar cuentas, ingresos y gastos", "Manage accounts, income and expenses"],
+  roleResident: ["Residente", "Resident"],
+  roleResidentDesc: ["Ver mi estado de cuenta y reportar pagos", "View my statement and report payments"],
+  username: ["Usuario", "Username"],
+  password: ["Contraseña", "Password"],
+  signIn: ["Iniciar sesión", "Sign in"],
+  back: ["Volver", "Back"],
+  invalidCreds: ["Usuario o contraseña incorrectos.", "Incorrect username or password."],
+  logout: ["Cerrar sesión", "Log out"],
+  overview: ["Resumen", "Overview"],
+  apartments: ["Apartamentos", "Apartments"],
+  income: ["Ingresos Mantenimiento", "Maintenance Income"],
+  expenses: ["Gastos", "Expenses"],
+  gasSection: ["Gas Propano", "Propane Gas"],
+  reports: ["Reportes de Pago", "Payment Reports"],
+  finance: ["Estado Financiero", "Financial Statement"],
+  myOverview: ["Mi Resumen", "My Overview"],
+  reportPayment: ["Reportar Pago", "Report a Payment"],
+  myReports: ["Mis Reportes", "My Reports"],
+  total: ["Total", "Total"],
+  pending: ["Pendiente", "Pending"],
+  delete: ["Eliminar", "Delete"],
+  confirmQ: ["¿Confirmar?", "Confirm?"],
+  addMonth: ["Agregar mes", "Add month"],
+  addApartment: ["Nuevo apartamento", "New apartment"],
+  addConcept: ["Nuevo concepto", "New item"],
+  saved: ["Guardado ✓", "Saved ✓"],
+  apartment: ["Apartamento", "Apartment"],
+  concept: ["Concepto", "Item"],
+  month: ["Mes", "Month"],
+  amount: ["Monto", "Amount"],
+  note: ["Nota", "Note"],
+  type: ["Tipo", "Type"],
+  maintenance: ["Mantenimiento", "Maintenance"],
+  status: ["Estado", "Status"],
+  statusPending: ["Pendiente", "Pending"],
+  statusApproved: ["Aprobado", "Approved"],
+  statusRejected: ["Rechazado", "Rejected"],
+  approve: ["Aprobar", "Approve"],
+  reject: ["Rechazar", "Reject"],
+  submit: ["Enviar reporte", "Submit report"],
+  noReports: ["Aún no hay reportes.", "No reports yet."],
+  pendingBalance: ["Saldo pendiente", "Balance due"],
+  totalPaidMaint: ["Total pagado — mantenimiento", "Total paid — maintenance"],
+  totalPaidGas: ["Total pagado — gas", "Total paid — gas"],
+  fundsAvailable: ["Fondos actuales", "Funds available"],
+  totalIncome: ["Ingresos totales", "Total income"],
+  totalExpenses: ["Gastos totales", "Total expenses"],
+  previousBalance: ["Balance administración anterior", "Previous admin. balance"],
+  lateGasIncome: ["Ingreso por gas atrasado", "Late gas income"],
+  pendingDebtsIncome: ["Ingresos por deudas pendientes", "Income from pending debts"],
+  extraordinaryPayment: ["Pago extraordinario", "Extraordinary payment"],
+  createAccount: ["Crear cuenta", "Create account"],
+  cancel: ["Cancelar", "Cancel"],
+  securityNote: [
+    "Las cuentas y los datos de este panel se guardan dentro de la app y los ve cualquiera con acceso a ella. No ingreses información más sensible de la necesaria para administrar el residencial.",
+    "Accounts and data here are stored inside the app and visible to anyone with access to it. Don't enter more sensitive information than needed to run the building."
+  ],
+  welcome: ["Bienvenido/a", "Welcome"],
+  reportSubmitted: ["Tu reporte fue enviado y quedará pendiente de aprobación.", "Your report was submitted and is now pending approval."],
+  myPaymentsMaint: ["Historial de mantenimiento", "Maintenance history"],
+  myPaymentsGas: ["Historial de gas propano", "Propane gas history"],
+  requiredFields: ["Completa todos los campos.", "Fill in all the fields."],
+  usernameTaken: ["Ese usuario ya existe.", "That username is already taken."],
+  loading: ["Cargando…", "Loading…"],
+  overviewSubtitle: ["Panorama financiero del residencial", "Building's financial overview"],
+  gasIncomeTitle: ["Ingresos por Gas Propano", "Propane Gas Income"],
+  gasExpenseTitle: ["Gastos de Gas Propano", "Propane Gas Expenses"],
+  residentialExpenseTitle: ["Gastos Residenciales", "Building Expenses"],
+  incomeMaintTitle: ["Ingresos por Mantenimiento", "Maintenance Income"],
+  monthlyTrend: ["Ingresos vs. Gastos por mes", "Income vs. Expenses by month"],
+  residentName: ["Nombre del residente", "Resident name"],
+  aptId: ["Identificador (ej. 5A)", "Unit ID (e.g. 5A)"],
+  reportNewPayment: ["Reportar un nuevo pago", "Report a new payment"],
+  optional: ["opcional", "optional"],
+  dbOffline: [
+    "Modo sin conexión: esta vista de muestra no guarda ni sincroniza cambios con otros usuarios.",
+    "Offline mode: this preview does not save or sync changes with other users."
+  ],
+};
+function useT(lang) { return (key) => (DICT[key] ? DICT[key][lang === "en" ? 1 : 0] : key); }
+function detectLang() { try { const nav = (navigator.language || (navigator.languages && navigator.languages[0]) || "es").toLowerCase(); return nav.startsWith("en") ? "en" : "es"; } catch { return "es"; } }
+function monthLabel(key, lang) { const [y, m] = key.split("-").map(Number); const d = new Date(y, m - 1, 1); return d.toLocaleDateString(lang === "en" ? "en-US" : "es-DO", { month: "short", year: "numeric" }); }
+function nextMonthKey(months) { const last = months[months.length - 1]; const [y, m] = last.split("-").map(Number); const d = new Date(y, m, 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; }
+function fmt(n, lang) { const v = Number(n) || 0; return "RD$ " + v.toLocaleString(lang === "en" ? "en-US" : "es-DO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function sumAmounts(amounts, months) { return months.reduce((s, m) => s + (Number(amounts[m]) || 0), 0); }
+
+/* ---------------------------------------------------------------------- */
+/* Custom inline-SVG chart (replaces recharts, which has no reliable      */
+/* browser-script build for a published, dependency-free page)            */
+/* ---------------------------------------------------------------------- */
+
+function MonthlyChart({ data, t }) {
+  const width = Math.max(760, data.length * 50);
+  const height = 300;
+  const pad = { top: 10, right: 10, bottom: 34, left: 56 };
+  const innerW = width - pad.left - pad.right;
+  const innerH = height - pad.top - pad.bottom;
+  const maxVal = Math.max(1, ...data.flatMap((d) => [d.Ingresos, d.Gastos, d.Neto]));
+  const minVal = Math.min(0, ...data.map((d) => d.Neto));
+  const yScale = (v) => innerH - ((v - minVal) / (maxVal - minVal || 1)) * innerH;
+  const bandW = innerW / data.length;
+  const barW = Math.min(14, bandW * 0.3);
+  const linePoints = data.map((d, i) => `${i * bandW + bandW / 2},${yScale(d.Neto)}`).join(" ");
+  const gridLines = 4;
+
+  return (
+    <div>
+      <div className="overflow-x-auto">
+        <svg viewBox={`0 0 ${width} ${height}`} width="100%" style={{ minWidth: 600 }}>
+          <g transform={`translate(${pad.left},${pad.top})`}>
+            {Array.from({ length: gridLines + 1 }).map((_, i) => {
+              const v = minVal + ((maxVal - minVal) * i) / gridLines;
+              const y = yScale(v);
+              return (
+                <g key={i}>
+                  <line x1={0} x2={innerW} y1={y} y2={y} stroke="#e7e5e4" strokeDasharray="3 3" />
+                  <text x={-8} y={y} textAnchor="end" dominantBaseline="middle" fontSize="10" fill="#78716c">{Math.round(v / 1000)}k</text>
+                </g>
+              );
+            })}
+            <line x1={0} x2={innerW} y1={yScale(0)} y2={yScale(0)} stroke="#a8a29e" />
+            {data.map((d, i) => {
+              const x0 = i * bandW + bandW / 2;
+              return (
+                <g key={i}>
+                  <rect x={x0 - barW - 2} y={Math.min(yScale(0), yScale(d.Ingresos))} width={barW} height={Math.max(0.5, Math.abs(yScale(d.Ingresos) - yScale(0)))} fill={COLORS.income} rx="2" />
+                  <rect x={x0 + 2} y={Math.min(yScale(0), yScale(d.Gastos))} width={barW} height={Math.max(0.5, Math.abs(yScale(d.Gastos) - yScale(0)))} fill={COLORS.expense} rx="2" />
+                  <text x={x0} y={innerH + 16} textAnchor="middle" fontSize="9" fill="#78716c">{d.month}</text>
+                </g>
+              );
+            })}
+            <polyline points={linePoints} fill="none" stroke={COLORS.net} strokeWidth="2" />
+            {data.map((d, i) => <circle key={i} cx={i * bandW + bandW / 2} cy={yScale(d.Neto)} r="2.5" fill={COLORS.net} />)}
+          </g>
+        </svg>
+      </div>
+      <div className="flex items-center gap-5 mt-2 text-xs text-stone-500">
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: COLORS.income }} />{t("totalIncome")}</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: COLORS.expense }} />{t("totalExpenses")}</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 inline-block" style={{ background: COLORS.net }} />{t("fundsAvailable")}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/* Shared UI atoms                                                         */
+/* ---------------------------------------------------------------------- */
+
+function SavedPing({ show }) { if (!show) return null; return <span className="text-emerald-700 text-sm font-medium ml-3 animate-pulse">Guardado ✓</span>; }
+
+function StatCard({ label, value, tone = "neutral", icon: IconCmp }) {
+  const toneClasses = { neutral: "bg-white border-stone-200 text-stone-900", good: "bg-emerald-50 border-emerald-200 text-emerald-900", bad: "bg-rose-50 border-rose-200 text-rose-900" }[tone];
+  return (
+    <div className={`rounded-xl border p-4 ${toneClasses}`}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs uppercase tracking-wide opacity-70">{label}</span>
+        {IconCmp && <IconCmp size={16} className="opacity-60" />}
+      </div>
+      <div className="text-2xl font-semibold" style={{ fontFamily: "'Source Serif 4', serif" }}>{value}</div>
+    </div>
+  );
+}
+
+function StatusBadge({ status, t }) {
+  const map = { pending: "bg-amber-100 text-amber-800", approved: "bg-emerald-100 text-emerald-800", rejected: "bg-rose-100 text-rose-800" };
+  const label = { pending: t("statusPending"), approved: t("statusApproved"), rejected: t("statusRejected") }[status];
+  return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${map[status]}`}>{label}</span>;
+}
+
+function ConfirmButton({ label, confirmLabel, onConfirm, className }) {
+  const [confirming, setConfirming] = useState(false);
+  const timer = useRef(null);
+  useEffect(() => () => timer.current && clearTimeout(timer.current), []);
+  if (confirming) return <button className={`text-rose-700 font-semibold text-xs underline ${className || ""}`} onClick={() => { setConfirming(false); onConfirm(); }}>{confirmLabel}</button>;
+  return <button className={`text-rose-600 hover:text-rose-800 text-xs ${className || ""}`} onClick={() => { setConfirming(true); timer.current = setTimeout(() => setConfirming(false), 3000); }}>{label}</button>;
+}
+
+function MonthGridTable({ rows, months, lang, t, editable, onCellChange, rowLabelHeader, onDeleteRow, canDeleteRow }) {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-stone-200">
+      <table className="min-w-full text-sm border-collapse">
+        <thead>
+          <tr className="bg-stone-900 text-stone-50">
+            <th className="sticky left-0 z-10 bg-stone-900 px-3 py-2.5 text-left font-medium whitespace-nowrap">{rowLabelHeader}</th>
+            {months.map((m) => <th key={m} className="px-3 py-2.5 text-right font-medium whitespace-nowrap">{monthLabel(m, lang)}</th>)}
+            <th className="px-3 py-2.5 text-right font-medium whitespace-nowrap">{t("total")}</th>
+            {canDeleteRow && <th className="px-2 py-2.5" />}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, idx) => {
+            const total = sumAmounts(r.amounts, months);
+            return (
+              <tr key={r.id} className={idx % 2 ? "bg-stone-50" : "bg-white"}>
+                <td className={`sticky left-0 z-10 px-3 py-2 font-medium text-stone-800 whitespace-nowrap ${idx % 2 ? "bg-stone-50" : "bg-white"}`}>{r.label}</td>
+                {months.map((m) => {
+                  const val = r.amounts[m];
+                  return (
+                    <td key={m} className="px-1 py-1 text-right">
+                      {editable ? (
+                        <input type="number" step="0.01" defaultValue={val ?? ""} placeholder="—" onBlur={(e) => onCellChange(r.id, m, e.target.value)} className="w-24 text-right rounded border border-stone-200 px-1.5 py-1 text-stone-800 focus:outline-none focus:ring-2 focus:ring-teal-600" />
+                      ) : (
+                        <span className={val == null ? "text-stone-300" : "text-stone-700"}>{val == null ? "—" : fmt(val, lang)}</span>
+                      )}
+                    </td>
+                  );
+                })}
+                <td className="px-3 py-2 text-right font-semibold text-teal-800 whitespace-nowrap">{fmt(total, lang)}</td>
+                {canDeleteRow && <td className="px-2 py-2 text-center"><ConfirmButton label={t("delete")} confirmLabel={t("confirmQ")} onConfirm={() => onDeleteRow(r.id)} /></td>}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/* Login screen                                                            */
+/* ---------------------------------------------------------------------- */
+
+function LoginScreen({ lang, setLang, t, config, apartments, onLogin }) {
+  const [role, setRole] = useState(null);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [error, setError] = useState("");
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (role === "admin") {
+      if (username === config.adminUsername && password === config.adminPassword) { onLogin({ role: "admin" }); return; }
+    } else {
+      const apt = apartments.find((a) => a.username.toLowerCase() === username.trim().toLowerCase() && a.password === password);
+      if (apt) { onLogin({ role: "resident", aptId: apt.id }); return; }
+    }
+    setError(t("invalidCreds"));
+  };
+
+  return (
+    <div className="min-h-screen bg-stone-100 flex items-center justify-center px-4" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
+      <div className="w-full max-w-md">
+        <div className="flex justify-end mb-3">
+          <button onClick={() => setLang(lang === "es" ? "en" : "es")} className="flex items-center gap-1.5 text-stone-500 hover:text-stone-800 text-sm">
+            <Globe size={15} /> {lang === "es" ? "English" : "Español"}
+          </button>
+        </div>
+        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-8">
+          <div className="flex items-center gap-2 text-teal-700 mb-1">
+            <Building2 size={20} /><span className="text-sm font-medium tracking-wide">{config.residencialName}</span>
+          </div>
+          <h1 className="text-3xl text-stone-900 mb-1" style={{ fontFamily: "'Source Serif 4', serif" }}>{t("loginTitle")}</h1>
+          <p className="text-stone-500 text-sm mb-6">{t("loginSubtitle")}</p>
+          {!role ? (
+            <div className="grid grid-cols-1 gap-3">
+              <button onClick={() => setRole("admin")} className="text-left rounded-xl border border-stone-200 p-4 hover:border-teal-600 hover:bg-teal-50/50 transition-colors">
+                <div className="font-semibold text-stone-900">{t("roleAdmin")}</div>
+                <div className="text-sm text-stone-500">{t("roleAdminDesc")}</div>
+              </button>
+              <button onClick={() => setRole("resident")} className="text-left rounded-xl border border-stone-200 p-4 hover:border-teal-600 hover:bg-teal-50/50 transition-colors">
+                <div className="font-semibold text-stone-900">{t("roleResident")}</div>
+                <div className="text-sm text-stone-500">{t("roleResidentDesc")}</div>
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={submit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">{t("username")}</label>
+                <input autoFocus value={username} onChange={(e) => setUsername(e.target.value)} className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">{t("password")}</label>
+                <div className="relative">
+                  <input type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-lg border border-stone-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-teal-600" />
+                  <button type="button" onClick={() => setShowPw((s) => !s)} className="absolute right-2 top-2.5 text-stone-400">{showPw ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+                </div>
+              </div>
+              {error && <p className="text-rose-600 text-sm">{error}</p>}
+              <div className="flex items-center gap-3 pt-2">
+                <button type="submit" className="flex-1 bg-teal-700 hover:bg-teal-800 text-white rounded-lg py-2.5 font-medium transition-colors">{t("signIn")}</button>
+                <button type="button" onClick={() => { setRole(null); setError(""); setUsername(""); setPassword(""); }} className="text-stone-500 hover:text-stone-800 text-sm px-2">{t("back")}</button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/* Admin App                                                                */
+/* ---------------------------------------------------------------------- */
+
+function AdminApp({ lang, setLang, t, data, actions, onLogout }) {
+  const [tab, setTab] = useState("overview");
+  const { config, apartments, expenses, balance, reports } = data;
+  const [saved, setSaved] = useState(false);
+  const flashSaved = () => { setSaved(true); setTimeout(() => setSaved(false), 1500); };
+
+  const tabs = [
+    { key: "overview", label: t("overview"), icon: LayoutDashboard },
+    { key: "apartments", label: t("apartments"), icon: Users },
+    { key: "income", label: t("income"), icon: Wallet },
+    { key: "expenses", label: t("expenses"), icon: ClipboardList },
+    { key: "gas", label: t("gasSection"), icon: Flame },
+    { key: "reports", label: t("reports"), icon: Send },
+    { key: "finance", label: t("finance"), icon: ScrollText },
+  ];
+
+  return (
+    <div className="min-h-screen bg-stone-100 flex" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
+      <aside className="w-60 shrink-0 bg-stone-900 text-stone-200 flex flex-col">
+        <div className="px-5 py-6 border-b border-stone-800">
+          <div className="flex items-center gap-2 text-teal-400 mb-1"><Building2 size={18} /><span className="text-xs uppercase tracking-wide">{t("roleAdmin")}</span></div>
+          <div className="font-semibold text-white leading-tight" style={{ fontFamily: "'Source Serif 4', serif" }}>{config.residencialName}</div>
+        </div>
+        <nav className="flex-1 py-3">
+          {tabs.map((tb) => (
+            <button key={tb.key} onClick={() => setTab(tb.key)} className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm text-left transition-colors ${tab === tb.key ? "bg-teal-700/90 text-white" : "text-stone-300 hover:bg-stone-800"}`}>
+              <tb.icon size={16} /> {tb.label}
+            </button>
+          ))}
+        </nav>
+        <div className="p-4 border-t border-stone-800 space-y-2">
+          <button onClick={() => setLang(lang === "es" ? "en" : "es")} className="flex items-center gap-2 text-stone-400 hover:text-white text-sm"><Globe size={14} /> {lang === "es" ? "English" : "Español"}</button>
+          <button onClick={onLogout} className="flex items-center gap-2 text-stone-400 hover:text-white text-sm"><LogOut size={14} /> {t("logout")}</button>
+        </div>
+      </aside>
+
+      <main className="flex-1 p-8 overflow-x-auto">
+        {tab === "overview" && <OverviewTab t={t} lang={lang} config={config} apartments={apartments} expenses={expenses} balance={balance} />}
+
+        {tab === "apartments" && <ApartmentsTab t={t} lang={lang} apartments={apartments} onSave={async (next) => { await actions.saveApartments(next); flashSaved(); }} />}
+
+        {tab === "income" && (
+          <SectionHeader title={t("incomeMaintTitle")} saved={saved}>
+            <GridSection t={t} lang={lang} months={config.months}
+              rows={apartments.map((a) => ({ id: a.id, label: `${a.id}${a.residentName ? " · " + a.residentName : ""}`, amounts: a.maint }))}
+              rowLabelHeader={t("apartment")}
+              onCellChange={(id, month, value) => { const next = apartments.map((a) => a.id === id ? { ...a, maint: { ...a.maint, [month]: value === "" ? null : Number(value) } } : a); actions.saveApartments(next); flashSaved(); }}
+              onAddMonth={() => { actions.addMonth(); flashSaved(); }} addMonthLabel={t("addMonth")} />
+          </SectionHeader>
+        )}
+
+        {tab === "expenses" && (
+          <SectionHeader title={t("residentialExpenseTitle")} saved={saved}>
+            <ExpenseGrid t={t} lang={lang} months={config.months}
+              rows={expenses.residential.map((r) => ({ id: r.id, label: r.concept, amounts: r.amounts }))}
+              onCellChange={(id, month, value) => { const next = { ...expenses, residential: expenses.residential.map((r) => r.id === id ? { ...r, amounts: { ...r.amounts, [month]: value === "" ? null : Number(value) } } : r) }; actions.saveExpenses(next); flashSaved(); }}
+              onAddRow={(concept) => { const id = "res-" + Date.now(); const next = { ...expenses, residential: [...expenses.residential, { id, concept, amounts: {} }] }; actions.saveExpenses(next); flashSaved(); }}
+              onDeleteRow={(id) => { const next = { ...expenses, residential: expenses.residential.filter((r) => r.id !== id) }; actions.saveExpenses(next); flashSaved(); }}
+              onAddMonth={() => { actions.addMonth(); flashSaved(); }} />
+          </SectionHeader>
+        )}
+
+        {tab === "gas" && (
+          <div className="space-y-10">
+            <SectionHeader title={t("gasIncomeTitle")} saved={saved}>
+              <GridSection t={t} lang={lang} months={config.months}
+                rows={apartments.map((a) => ({ id: a.id, label: `${a.id}${a.residentName ? " · " + a.residentName : ""}`, amounts: a.gas }))}
+                rowLabelHeader={t("apartment")}
+                onCellChange={(id, month, value) => { const next = apartments.map((a) => a.id === id ? { ...a, gas: { ...a.gas, [month]: value === "" ? null : Number(value) } } : a); actions.saveApartments(next); flashSaved(); }}
+                onAddMonth={() => { actions.addMonth(); flashSaved(); }} addMonthLabel={t("addMonth")} />
+            </SectionHeader>
+            <SectionHeader title={t("gasExpenseTitle")} saved={false}>
+              <ExpenseGrid t={t} lang={lang} months={config.months}
+                rows={expenses.gas.map((r) => ({ id: r.id, label: r.concept, amounts: r.amounts }))}
+                onCellChange={(id, month, value) => { const next = { ...expenses, gas: expenses.gas.map((r) => r.id === id ? { ...r, amounts: { ...r.amounts, [month]: value === "" ? null : Number(value) } } : r) }; actions.saveExpenses(next); flashSaved(); }}
+                onAddRow={(concept) => { const id = "gas-" + Date.now(); const next = { ...expenses, gas: [...expenses.gas, { id, concept, amounts: {} }] }; actions.saveExpenses(next); flashSaved(); }}
+                onDeleteRow={(id) => { const next = { ...expenses, gas: expenses.gas.filter((r) => r.id !== id) }; actions.saveExpenses(next); flashSaved(); }}
+                onAddMonth={() => { actions.addMonth(); flashSaved(); }} />
+            </SectionHeader>
+          </div>
+        )}
+
+        {tab === "reports" && <ReportsTab t={t} lang={lang} reports={reports} apartments={apartments} onDecide={async (id, decision) => { await actions.decideReport(id, decision); flashSaved(); }} />}
+
+        {tab === "finance" && <FinanceTab t={t} lang={lang} config={config} apartments={apartments} expenses={expenses} balance={balance} onSaveBalance={async (next) => { await actions.saveBalance(next); flashSaved(); }} />}
+      </main>
+    </div>
+  );
+}
+
+function SectionHeader({ title, saved, children }) {
+  return (
+    <section>
+      <div className="flex items-center mb-4">
+        <h2 className="text-xl text-stone-900" style={{ fontFamily: "'Source Serif 4', serif" }}>{title}</h2>
+        <SavedPing show={saved} />
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function GridSection({ t, lang, months, rows, rowLabelHeader, onCellChange, onAddMonth, addMonthLabel }) {
+  return (
+    <div className="space-y-3">
+      <MonthGridTable rows={rows} months={months} lang={lang} t={t} editable onCellChange={onCellChange} rowLabelHeader={rowLabelHeader} />
+      <button onClick={onAddMonth} className="flex items-center gap-1.5 text-teal-700 hover:text-teal-900 text-sm font-medium"><Plus size={15} /> {addMonthLabel}</button>
+    </div>
+  );
+}
+
+function ExpenseGrid({ t, lang, months, rows, onCellChange, onAddRow, onDeleteRow, onAddMonth }) {
+  const [newConcept, setNewConcept] = useState("");
+  return (
+    <div className="space-y-3">
+      <MonthGridTable rows={rows} months={months} lang={lang} t={t} editable onCellChange={onCellChange} rowLabelHeader={t("concept")} canDeleteRow onDeleteRow={onDeleteRow} />
+      <div className="flex flex-wrap items-center gap-2">
+        <input value={newConcept} onChange={(e) => setNewConcept(e.target.value)} placeholder={t("concept")} className="rounded-lg border border-stone-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600" />
+        <button onClick={() => { if (newConcept.trim()) { onAddRow(newConcept.trim()); setNewConcept(""); } }} className="flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg px-3 py-1.5 text-sm font-medium"><Plus size={14} /> {t("addConcept")}</button>
+        <button onClick={onAddMonth} className="flex items-center gap-1.5 text-teal-700 hover:text-teal-900 text-sm font-medium ml-2"><Plus size={15} /> {t("addMonth")}</button>
+      </div>
+    </div>
+  );
+}
+
+function OverviewTab({ t, lang, config, apartments, expenses, balance }) {
+  const months = config.months;
+  const totalMaint = apartments.reduce((s, a) => s + sumAmounts(a.maint, months), 0);
+  const totalGasIn = apartments.reduce((s, a) => s + sumAmounts(a.gas, months), 0);
+  const totalResExp = expenses.residential.reduce((s, r) => s + sumAmounts(r.amounts, months), 0);
+  const totalGasExp = expenses.gas.reduce((s, r) => s + sumAmounts(r.amounts, months), 0);
+  const totalIncome = totalMaint + totalGasIn;
+  const totalExpense = totalResExp + totalGasExp;
+  const totalPending = apartments.reduce((s, a) => s + (Number(a.pendingBalance) || 0), 0);
+  const netAdjustment = balance.balanceAnterior + balance.ingresoGasAtrasado + balance.ingresosDeudasPendientes - balance.pagoExtraordinario;
+  const fundsAvailable = netAdjustment + (totalIncome - totalExpense);
+
+  const chartData = months.map((m) => {
+    const inc = apartments.reduce((s, a) => s + (Number(a.maint[m]) || 0) + (Number(a.gas[m]) || 0), 0);
+    const exp = expenses.residential.reduce((s, r) => s + (Number(r.amounts[m]) || 0), 0) + expenses.gas.reduce((s, r) => s + (Number(r.amounts[m]) || 0), 0);
+    return { month: monthLabel(m, lang), Ingresos: Math.round(inc), Gastos: Math.round(exp), Neto: Math.round(inc - exp) };
+  });
+
+  return (
+    <section>
+      <h2 className="text-2xl text-stone-900 mb-1" style={{ fontFamily: "'Source Serif 4', serif" }}>{t("overview")}</h2>
+      <p className="text-stone-500 text-sm mb-6">{t("overviewSubtitle")}</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <StatCard label={t("totalIncome")} value={fmt(totalIncome, lang)} tone="good" icon={ArrowUpRight} />
+        <StatCard label={t("totalExpenses")} value={fmt(totalExpense, lang)} tone="bad" icon={ArrowDownRight} />
+        <StatCard label={t("fundsAvailable")} value={fmt(fundsAvailable, lang)} tone={fundsAvailable >= 0 ? "good" : "bad"} icon={CircleDollarSign} />
+        <StatCard label={t("pendingBalance")} value={fmt(totalPending, lang)} tone="bad" icon={Wallet} />
+      </div>
+      <div className="bg-white rounded-xl border border-stone-200 p-5 mb-8">
+        <h3 className="text-stone-700 font-medium mb-4">{t("monthlyTrend")}</h3>
+        <MonthlyChart data={chartData} t={t} />
+      </div>
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900">{t("securityNote")}</div>
+    </section>
+  );
+}
+
+function ApartmentsTab({ t, lang, apartments, onSave }) {
+  const [showPw, setShowPw] = useState({});
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState({ id: "", residentName: "", username: "", password: "" });
+  const [error, setError] = useState("");
+  const update = (id, field, value) => onSave(apartments.map((a) => a.id === id ? { ...a, [field]: value } : a));
+
+  const addApartment = () => {
+    if (!form.id.trim() || !form.residentName.trim() || !form.username.trim() || !form.password.trim()) { setError(t("requiredFields")); return; }
+    if (apartments.some((a) => a.username.toLowerCase() === form.username.trim().toLowerCase())) { setError(t("usernameTaken")); return; }
+    onSave([...apartments, { id: form.id.trim(), residentName: form.residentName.trim(), username: form.username.trim(), password: form.password.trim(), pendingBalance: 0, maint: {}, gas: {} }]);
+    setForm({ id: "", residentName: "", username: "", password: "" }); setError(""); setAdding(false);
+  };
+
+  return (
+    <section>
+      <h2 className="text-xl text-stone-900 mb-4" style={{ fontFamily: "'Source Serif 4', serif" }}>{t("apartments")}</h2>
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900 mb-4">{t("securityNote")}</div>
+      <div className="overflow-x-auto rounded-lg border border-stone-200 mb-4">
+        <table className="min-w-full text-sm">
+          <thead className="bg-stone-900 text-stone-50">
+            <tr>
+              <th className="px-3 py-2.5 text-left font-medium">{t("apartment")}</th>
+              <th className="px-3 py-2.5 text-left font-medium">{t("residentName")}</th>
+              <th className="px-3 py-2.5 text-left font-medium">{t("username")}</th>
+              <th className="px-3 py-2.5 text-left font-medium">{t("password")}</th>
+              <th className="px-3 py-2.5 text-right font-medium">{t("pendingBalance")}</th>
+              <th className="px-3 py-2.5" />
+            </tr>
+          </thead>
+          <tbody>
+            {apartments.map((a, idx) => (
+              <tr key={a.id} className={idx % 2 ? "bg-stone-50" : "bg-white"}>
+                <td className="px-3 py-2 font-medium text-stone-800">{a.id}</td>
+                <td className="px-3 py-2"><input defaultValue={a.residentName} onBlur={(e) => update(a.id, "residentName", e.target.value)} className="w-40 rounded border border-stone-200 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-teal-600" /></td>
+                <td className="px-3 py-2"><input defaultValue={a.username} onBlur={(e) => update(a.id, "username", e.target.value)} className="w-28 rounded border border-stone-200 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-teal-600" /></td>
+                <td className="px-3 py-2">
+                  <div className="flex items-center gap-1">
+                    <input type={showPw[a.id] ? "text" : "password"} defaultValue={a.password} onBlur={(e) => update(a.id, "password", e.target.value)} className="w-28 rounded border border-stone-200 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-teal-600" />
+                    <button onClick={() => setShowPw((s) => ({ ...s, [a.id]: !s[a.id] }))} className="text-stone-400 hover:text-stone-700">{showPw[a.id] ? <EyeOff size={14} /> : <Eye size={14} />}</button>
+                  </div>
+                </td>
+                <td className="px-3 py-2 text-right"><input type="number" step="0.01" defaultValue={a.pendingBalance} onBlur={(e) => update(a.id, "pendingBalance", Number(e.target.value) || 0)} className="w-24 text-right rounded border border-stone-200 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-teal-600" /></td>
+                <td className="px-2 py-2 text-center"><ConfirmButton label={t("delete")} confirmLabel={t("confirmQ")} onConfirm={() => onSave(apartments.filter((x) => x.id !== a.id))} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {!adding ? (
+        <button onClick={() => setAdding(true)} className="flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg px-3 py-2 text-sm font-medium"><Plus size={15} /> {t("addApartment")}</button>
+      ) : (
+        <div className="bg-white border border-stone-200 rounded-xl p-4 max-w-xl">
+          <h3 className="font-medium text-stone-800 mb-3">{t("createAccount")}</h3>
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <input placeholder={t("aptId")} value={form.id} onChange={(e) => setForm({ ...form, id: e.target.value })} className="rounded border border-stone-300 px-3 py-2" />
+            <input placeholder={t("residentName")} value={form.residentName} onChange={(e) => setForm({ ...form, residentName: e.target.value })} className="rounded border border-stone-300 px-3 py-2" />
+            <input placeholder={t("username")} value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} className="rounded border border-stone-300 px-3 py-2" />
+            <input placeholder={t("password")} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="rounded border border-stone-300 px-3 py-2" />
+          </div>
+          {error && <p className="text-rose-600 text-sm mb-2">{error}</p>}
+          <div className="flex gap-2">
+            <button onClick={addApartment} className="bg-teal-700 hover:bg-teal-800 text-white rounded-lg px-4 py-2 text-sm font-medium">{t("createAccount")}</button>
+            <button onClick={() => { setAdding(false); setError(""); }} className="text-stone-500 hover:text-stone-800 text-sm px-2">{t("cancel")}</button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ReportsTab({ t, lang, reports, apartments, onDecide }) {
+  const aptLabel = (id) => { const a = apartments.find((x) => x.id === id); return a ? `${a.id}${a.residentName ? " · " + a.residentName : ""}` : id; };
+  const sorted = [...reports].sort((a, b) => (a.date < b.date ? 1 : -1));
+  return (
+    <section>
+      <h2 className="text-xl text-stone-900 mb-4" style={{ fontFamily: "'Source Serif 4', serif" }}>{t("reports")}</h2>
+      {sorted.length === 0 ? <p className="text-stone-500 text-sm">{t("noReports")}</p> : (
+        <div className="overflow-x-auto rounded-lg border border-stone-200">
+          <table className="min-w-full text-sm">
+            <thead className="bg-stone-900 text-stone-50">
+              <tr>
+                <th className="px-3 py-2.5 text-left font-medium">{t("apartment")}</th>
+                <th className="px-3 py-2.5 text-left font-medium">{t("type")}</th>
+                <th className="px-3 py-2.5 text-left font-medium">{t("month")}</th>
+                <th className="px-3 py-2.5 text-right font-medium">{t("amount")}</th>
+                <th className="px-3 py-2.5 text-left font-medium">{t("note")}</th>
+                <th className="px-3 py-2.5 text-left font-medium">{t("status")}</th>
+                <th className="px-3 py-2.5" />
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((r, idx) => (
+                <tr key={r.id} className={idx % 2 ? "bg-stone-50" : "bg-white"}>
+                  <td className="px-3 py-2 font-medium text-stone-800">{aptLabel(r.aptId)}</td>
+                  <td className="px-3 py-2 text-stone-600">{r.type === "gas" ? t("gasSection") : t("maintenance")}</td>
+                  <td className="px-3 py-2 text-stone-600">{monthLabel(r.month, lang)}</td>
+                  <td className="px-3 py-2 text-right font-medium text-stone-800">{fmt(r.amount, lang)}</td>
+                  <td className="px-3 py-2 text-stone-500 max-w-[220px] truncate" title={r.note}>{r.note || "—"}</td>
+                  <td className="px-3 py-2"><StatusBadge status={r.status} t={t} /></td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {r.status === "pending" && (
+                      <div className="flex gap-2">
+                        <button onClick={() => onDecide(r.id, "approved")} className="flex items-center gap-1 text-emerald-700 hover:text-emerald-900 text-xs font-medium"><Check size={13} /> {t("approve")}</button>
+                        <button onClick={() => onDecide(r.id, "rejected")} className="flex items-center gap-1 text-rose-600 hover:text-rose-800 text-xs font-medium"><X size={13} /> {t("reject")}</button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function FinanceTab({ t, lang, config, apartments, expenses, balance, onSaveBalance }) {
+  const months = config.months;
+  const totalMaint = apartments.reduce((s, a) => s + sumAmounts(a.maint, months), 0);
+  const totalGasIn = apartments.reduce((s, a) => s + sumAmounts(a.gas, months), 0);
+  const totalResExp = expenses.residential.reduce((s, r) => s + sumAmounts(r.amounts, months), 0);
+  const totalGasExp = expenses.gas.reduce((s, r) => s + sumAmounts(r.amounts, months), 0);
+  const netAdjustment = balance.balanceAnterior + balance.ingresoGasAtrasado + balance.ingresosDeudasPendientes - balance.pagoExtraordinario;
+  const fundsAvailable = netAdjustment + (totalMaint + totalGasIn) - (totalResExp + totalGasExp);
+  const field = (key, label) => (
+    <div>
+      <label className="block text-sm font-medium text-stone-700 mb-1">{label}</label>
+      <input type="number" step="0.01" defaultValue={balance[key]} onBlur={(e) => onSaveBalance({ ...balance, [key]: Number(e.target.value) || 0 })} className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600" />
+    </div>
+  );
+  return (
+    <section>
+      <h2 className="text-xl text-stone-900 mb-4" style={{ fontFamily: "'Source Serif 4', serif" }}>{t("finance")}</h2>
+      <div className="grid md:grid-cols-2 gap-4 max-w-2xl mb-8">
+        {field("balanceAnterior", t("previousBalance"))}
+        {field("ingresoGasAtrasado", t("lateGasIncome"))}
+        {field("ingresosDeudasPendientes", t("pendingDebtsIncome"))}
+        {field("pagoExtraordinario", t("extraordinaryPayment"))}
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl">
+        <StatCard label={t("totalPaidMaint")} value={fmt(totalMaint, lang)} />
+        <StatCard label={t("totalPaidGas")} value={fmt(totalGasIn, lang)} />
+        <StatCard label={t("totalExpenses")} value={fmt(totalResExp + totalGasExp, lang)} tone="bad" />
+        <StatCard label={t("fundsAvailable")} value={fmt(fundsAvailable, lang)} tone={fundsAvailable >= 0 ? "good" : "bad"} />
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/* Resident App                                                            */
+/* ---------------------------------------------------------------------- */
+
+function ResidentApp({ lang, setLang, t, data, actions, onLogout, aptId }) {
+  const [tab, setTab] = useState("myOverview");
+  const { config, apartments, reports } = data;
+  const apt = apartments.find((a) => a.id === aptId);
+  const myReports = reports.filter((r) => r.aptId === aptId).sort((a, b) => (a.date < b.date ? 1 : -1));
+  if (!apt) return null;
+  const totalMaint = sumAmounts(apt.maint, config.months);
+  const totalGas = sumAmounts(apt.gas, config.months);
+  const tabs = [{ key: "myOverview", label: t("myOverview") }, { key: "reportPayment", label: t("reportPayment") }, { key: "myReports", label: t("myReports") }];
+
+  return (
+    <div className="min-h-screen bg-stone-100" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
+      <header className="bg-stone-900 text-white">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-teal-400 text-xs uppercase tracking-wide mb-0.5"><Building2 size={14} /> {config.residencialName}</div>
+            <div className="font-semibold" style={{ fontFamily: "'Source Serif 4', serif" }}>{t("welcome")}, {apt.residentName || apt.id} · {t("apartment")} {apt.id}</div>
+          </div>
+          <div className="flex items-center gap-4">
+            <button onClick={() => setLang(lang === "es" ? "en" : "es")} className="flex items-center gap-1.5 text-stone-300 hover:text-white text-sm"><Globe size={15} /> {lang === "es" ? "EN" : "ES"}</button>
+            <button onClick={onLogout} className="flex items-center gap-1.5 text-stone-300 hover:text-white text-sm"><LogOut size={15} /> {t("logout")}</button>
+          </div>
+        </div>
+        <nav className="max-w-4xl mx-auto px-6 flex gap-1 border-t border-stone-800">
+          {tabs.map((tb) => <button key={tb.key} onClick={() => setTab(tb.key)} className={`px-4 py-2.5 text-sm border-b-2 transition-colors ${tab === tb.key ? "border-teal-400 text-white" : "border-transparent text-stone-400 hover:text-stone-200"}`}>{tb.label}</button>)}
+        </nav>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-6 py-8">
+        {tab === "myOverview" && (
+          <section>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+              <StatCard label={t("pendingBalance")} value={fmt(apt.pendingBalance, lang)} tone={apt.pendingBalance > 0 ? "bad" : "good"} icon={Wallet} />
+              <StatCard label={t("totalPaidMaint")} value={fmt(totalMaint, lang)} tone="good" />
+              <StatCard label={t("totalPaidGas")} value={fmt(totalGas, lang)} tone="good" />
+            </div>
+            <h3 className="text-lg text-stone-900 mb-2" style={{ fontFamily: "'Source Serif 4', serif" }}>{t("myPaymentsMaint")}</h3>
+            <MonthGridTable rows={[{ id: apt.id, label: t("maintenance"), amounts: apt.maint }]} months={config.months} lang={lang} t={t} editable={false} rowLabelHeader={t("concept")} />
+            <h3 className="text-lg text-stone-900 mt-8 mb-2" style={{ fontFamily: "'Source Serif 4', serif" }}>{t("myPaymentsGas")}</h3>
+            <MonthGridTable rows={[{ id: apt.id, label: t("gasSection"), amounts: apt.gas }]} months={config.months} lang={lang} t={t} editable={false} rowLabelHeader={t("concept")} />
+          </section>
+        )}
+        {tab === "reportPayment" && <ReportPaymentForm t={t} months={config.months} lang={lang} onSubmit={(payload) => actions.submitReport({ ...payload, aptId: apt.id })} />}
+        {tab === "myReports" && (
+          <section>
+            <h2 className="text-xl text-stone-900 mb-4" style={{ fontFamily: "'Source Serif 4', serif" }}>{t("myReports")}</h2>
+            {myReports.length === 0 ? <p className="text-stone-500 text-sm">{t("noReports")}</p> : (
+              <div className="space-y-3">
+                {myReports.map((r) => (
+                  <div key={r.id} className="bg-white border border-stone-200 rounded-lg p-4 flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-stone-800">{r.type === "gas" ? t("gasSection") : t("maintenance")} · {monthLabel(r.month, lang)}</div>
+                      <div className="text-sm text-stone-500">{fmt(r.amount, lang)}{r.note ? " — " + r.note : ""}</div>
+                    </div>
+                    <StatusBadge status={r.status} t={t} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function ReportPaymentForm({ t, months, lang, onSubmit }) {
+  const [type, setType] = useState("maint");
+  const [month, setMonth] = useState(months[months.length - 1]);
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+  const [done, setDone] = useState(false);
+  const submit = (e) => {
+    e.preventDefault();
+    if (!amount || Number(amount) <= 0) return;
+    onSubmit({ type, month, amount: Number(amount), note: note.trim() });
+    setDone(true); setAmount(""); setNote("");
+    setTimeout(() => setDone(false), 4000);
+  };
+  return (
+    <section className="max-w-md">
+      <h2 className="text-xl text-stone-900 mb-4" style={{ fontFamily: "'Source Serif 4', serif" }}>{t("reportNewPayment")}</h2>
+      <form onSubmit={submit} className="bg-white border border-stone-200 rounded-xl p-5 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-stone-700 mb-1">{t("type")}</label>
+          <select value={type} onChange={(e) => setType(e.target.value)} className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600">
+            <option value="maint">{t("maintenance")}</option>
+            <option value="gas">{t("gasSection")}</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-stone-700 mb-1">{t("month")}</label>
+          <select value={month} onChange={(e) => setMonth(e.target.value)} className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600">
+            {months.map((m) => <option key={m} value={m}>{monthLabel(m, lang)}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-stone-700 mb-1">{t("amount")}</label>
+          <input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-stone-700 mb-1">{t("note")} <span className="text-stone-400">({t("optional")})</span></label>
+          <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600" />
+        </div>
+        <button type="submit" className="w-full flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg py-2.5 font-medium"><Send size={15} /> {t("submit")}</button>
+        {done && <p className="text-emerald-700 text-sm text-center">{t("reportSubmitted")}</p>}
+      </form>
+    </section>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/* Root App — data layer backed by the "db" runtime capability            */
+/* ---------------------------------------------------------------------- */
+
+function App() {
+  const [lang, setLang] = useState(detectLang());
+  const t = useT(lang);
+  const [session, setSession] = useState(null);
+  const [dbOnline, setDbOnline] = useState(null); // null=checking, true/false after
+  const dbRef = useRef(null);
+
+  const [config, setConfig] = useState(null);
+  const [apartments, setApartments] = useState(null);
+  const [expenses, setExpenses] = useState(null);
+  const [balance, setBalance] = useState(null);
+  const [reports, setReports] = useState([]);
+
+  useEffect(() => {
+    let unsubs = [];
+    let cancelled = false;
+
+    (async () => {
+      const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+      if (cancelled) return;
+
+      if (!db) {
+        setConfig(CONFIG_SEED);
+        setApartments(buildApartmentsSeed());
+        setExpenses(buildExpensesSeed());
+        setBalance(BALANCE_SEED);
+        setReports([]);
+        setDbOnline(false);
+        return;
+      }
+
+      dbRef.current = db;
+      setDbOnline(true);
+
+      const configRef = db.doc("app/config");
+      const apartmentsRef = db.doc("app/apartments");
+      const expensesRef = db.doc("app/expenses");
+      const balanceRef = db.doc("app/balance");
+      const reportsCol = db.collection("reports");
+
+      const ensureSeed = async (ref, seed) => {
+        try { const snap = await ref.get(); if (!snap.exists) await ref.set(seed); } catch (e) { /* ignore, onSnapshot will still report state */ }
+      };
+      await Promise.all([
+        ensureSeed(configRef, CONFIG_SEED),
+        ensureSeed(apartmentsRef, { items: buildApartmentsSeed() }),
+        ensureSeed(expensesRef, buildExpensesSeed()),
+        ensureSeed(balanceRef, BALANCE_SEED),
+      ]);
+      if (cancelled) return;
+
+      unsubs.push(configRef.onSnapshot((snap) => { if (snap.exists) setConfig(snap.data()); }));
+      unsubs.push(apartmentsRef.onSnapshot((snap) => { if (snap.exists) setApartments((snap.data().items) || []); }));
+      unsubs.push(expensesRef.onSnapshot((snap) => { if (snap.exists) setExpenses(snap.data()); }));
+      unsubs.push(balanceRef.onSnapshot((snap) => { if (snap.exists) setBalance(snap.data()); }));
+      unsubs.push(
+        reportsCol.orderBy("date", "desc").limit(300).onSnapshot((qs) => {
+          setReports(qs.docs.map((d) => ({ id: d.id, ...d.data() })));
+        })
+      );
+    })();
+
+    return () => { cancelled = true; unsubs.forEach((u) => u && u()); };
+  }, []);
+
+  if (!config || !apartments || !expenses || !balance) {
+    return <div className="min-h-screen bg-stone-100 flex items-center justify-center text-stone-500" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>{t("loading")}</div>;
+  }
+
+  const actions = {
+    saveApartments: async (next) => { setApartments(next); if (dbRef.current) await dbRef.current.doc("app/apartments").set({ items: next }); },
+    saveExpenses: async (next) => { setExpenses(next); if (dbRef.current) await dbRef.current.doc("app/expenses").set(next); },
+    saveBalance: async (next) => { setBalance(next); if (dbRef.current) await dbRef.current.doc("app/balance").set(next); },
+    addMonth: async () => {
+      const nm = nextMonthKey(config.months);
+      if (config.months.includes(nm)) return;
+      const next = { ...config, months: [...config.months, nm] };
+      setConfig(next); if (dbRef.current) await dbRef.current.doc("app/config").set(next);
+    },
+    submitReport: async (payload) => {
+      const report = { status: "pending", date: new Date().toISOString(), ...payload };
+      if (dbRef.current) { await dbRef.current.collection("reports").add(report); }
+      else { setReports((r) => [...r, { id: "local-" + Date.now(), ...report }]); }
+    },
+    decideReport: async (id, decision) => {
+      const report = reports.find((r) => r.id === id);
+      if (!report) return;
+      if (dbRef.current) await dbRef.current.collection("reports").doc(id).update({ status: decision });
+      else setReports((rs) => rs.map((r) => r.id === id ? { ...r, status: decision } : r));
+
+      if (decision === "approved") {
+        const nextApartments = apartments.map((a) => {
+          if (a.id !== report.aptId) return a;
+          const field = report.type === "gas" ? "gas" : "maint";
+          const current = Number(a[field][report.month]) || 0;
+          return { ...a, [field]: { ...a[field], [report.month]: current + report.amount }, pendingBalance: Math.max(0, (Number(a.pendingBalance) || 0) - report.amount) };
+        });
+        setApartments(nextApartments);
+        if (dbRef.current) await dbRef.current.doc("app/apartments").set({ items: nextApartments });
+      }
+    },
+  };
+
+  const data = { config, apartments, expenses, balance, reports };
+
+  const banner = dbOnline === false ? (
+    <div className="bg-amber-100 text-amber-900 text-xs text-center py-1.5 px-3">{t("dbOffline")}</div>
+  ) : null;
+
+  if (!session) {
+    return (<>{banner}<LoginScreen lang={lang} setLang={setLang} t={t} config={config} apartments={apartments} onLogin={setSession} /></>);
+  }
+  if (session.role === "admin") {
+    return (<>{banner}<AdminApp lang={lang} setLang={setLang} t={t} data={data} actions={actions} onLogout={() => setSession(null)} /></>);
+  }
+  return (<>{banner}<ResidentApp lang={lang} setLang={setLang} t={t} data={data} actions={actions} onLogout={() => setSession(null)} aptId={session.aptId} /></>);
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>
